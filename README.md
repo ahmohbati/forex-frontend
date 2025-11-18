@@ -69,28 +69,3 @@ Capture machine-readable results (JSON):
 ```powershell
 npx vitest run --reporter json > vitest-results.json
 ```
-
-**Troubleshooting**
-- "Unknown word import" or similar PostCSS errors: usually appear when a JS file was mistakenly saved as `.css` (e.g. `src/index.css` accidentally containing JS). Ensure `src/index.css` contains only CSS/PostCSS directives (it should start with `@tailwind base;`).
-- Missing `@vitejs/plugin-react`: run
-
-```powershell
-npm install --save-dev @vitejs/plugin-react
-```
-
-- Vite picks a different port when the default is occupied. To force a port, edit `vite.config.js` and add `server: { port: 5173, strictPort: true }`.
-- If tests show little/no output in your environment, run with debug or use the JSON reporter:
-
-```powershell
-$env:DEBUG='vitest:*'
-# then
-npx vitest run --reporter verbose
-# or
-npx vitest run --reporter json > vitest-results.json
-```
-
-**Notes & Tips**
-- The MSW browser worker is intended for development only; unit tests currently use `axios-mock-adapter` for reliability in Node.
-- Keep `react` and `react-dom` versions aligned (this repo uses React 18).
-
----
