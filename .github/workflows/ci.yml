@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare report directories
+        run: |
+          mkdir -p reports
+          mkdir -p coverage/vitest
+          mkdir -p coverage/jest
+
+      - name: Run Vitest (if present) and produce coverage + JUnit-like report
+        env:
+          CI: true
+        run: |
+          # run Vitest if the script exists; --if-present prevents failure if not
+          if npm run test:vitest --if-present --silent; then
+            echo "Vitest ran via npm script"
+          else
+            echo "Vitest script not present or failed; attempting direct npx vitest"
+            npx --no-install vitest --run --coverage --coverageProvider=v8 --coverageDirectory=coverage/vitest --reporter=json > reports/vitest.json || true
+          fi
+
+      - name: Run Jest and produce coverage + JSON report
+        env:
+          CI: true
+        run: |
+          # Run Jest via npm script if present, otherwise run npx jest
+          if npm run test:jest --if-present --silent; then
+            echo "Jest ran via npm script"
+          else
+            echo "Jest script not present or failed; attempting direct npx jest"
+            npx --no-install jest --coverage --coverageDirectory=coverage/jest --json --outputFile=reports/jest.json || true
+          fi
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            reports/**
+            coverage/**

@@ -7,12 +7,13 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Converter from './pages/Converter'
+import Transactions from './pages/Transactions'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="min-h-screen bg-gray-50">
           <Navbar />
           <main className="container mx-auto px-4 py-8">
@@ -35,6 +36,14 @@ function App() {
                     <Converter />
                   </ProtectedRoute>
                 } 
+              />
+              <Route 
+                path="/transactions"
+                element={
+                  <ProtectedRoute>
+                    <Transactions />
+                  </ProtectedRoute>
+                }
               />
             </Routes>
           </main>

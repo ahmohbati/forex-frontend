@@ -93,9 +93,4 @@ npx vitest run --reporter json > vitest-results.json
 - The MSW browser worker is intended for development only; unit tests currently use `axios-mock-adapter` for reliability in Node.
 - Keep `react` and `react-dom` versions aligned (this repo uses React 18).
 
-If you'd like, I can:
-- Add a `CONTRIBUTING.md` with development workflows.
-- Add a `Makefile` or `package.json` helper scripts for common debug flows (e.g., `test:debug`, `test:json`).
-
 ---
-_Generated on behalf of the repository developer — edit as needed._

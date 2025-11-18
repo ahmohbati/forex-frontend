@@ -30,6 +30,9 @@ const Navbar = () => {
                 <Link to="/converter" className="text-gray-700 hover:text-blue-600 transition-colors">
                   Converter
                 </Link>
+                <Link to="/transactions" className="text-gray-700 hover:text-blue-600 transition-colors">
+                  Transactions
+                </Link>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <User className="w-4 h-4" />
                   <span>Welcome, {user.firstName || user.email}</span>

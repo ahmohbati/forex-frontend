@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+// Allow overriding API base URL via global set by `main.jsx` (Vite), or process.env for tests/CI.
+// Using globalThis.__VITE_API_URL__ avoids referencing `import.meta` here which can
+// cause issues in some test environments.
+const API_BASE_URL = (typeof globalThis !== 'undefined' && globalThis.__VITE_API_URL__)
+  || (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL)
+  || 'http://localhost:3000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -51,7 +56,31 @@ export const currencyAPI = {
 };
 
 export const transactionAPI = {
-  getTransactions: () => api.get('/transactions'),
+  // Accept optional params (e.g. { page, limit }) and forward them as query params.
+  // Also normalize common pagination param aliases so the frontend can work with
+  // different backend conventions (pageNumber, perPage, page_size, etc.).
+  getTransactions: (params = {}) => {
+    if (!params || Object.keys(params).length === 0) {
+      return api.get('/transactions')
+    }
+    const mapped = {}
+    // page aliases
+    if (params.page != null) mapped.page = params.page
+    if (params.pageNumber != null) mapped.page = params.pageNumber
+    if (params.pageIndex != null) mapped.page = params.pageIndex
+    // limit / per-page aliases
+    if (params.limit != null) mapped.limit = params.limit
+    if (params.perPage != null) mapped.limit = params.perPage
+    if (params.pageSize != null) mapped.limit = params.pageSize
+    if (params.page_size != null) mapped.limit = params.page_size
+    // forward any other params untouched
+    Object.keys(params).forEach((k) => {
+      if (!['page', 'pageNumber', 'pageIndex', 'limit', 'perPage', 'pageSize', 'page_size'].includes(k)) {
+        mapped[k] = params[k]
+      }
+    })
+    return api.get('/transactions', { params: mapped })
+  },
   createTransaction: (data) => api.post('/transactions', data),
 };
 

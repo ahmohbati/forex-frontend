@@ -149,7 +149,12 @@ const Dashboard = () => {
                       </span>
                     </td>
                     <td className="py-3 text-right text-gray-600">
-                      {tx.exchangeRate.toFixed(4)}
+                      {(() => {
+                        // exchangeRate may come as string or number; guard against null/invalid
+                        const raw = tx.exchangeRate ?? tx.rate ?? tx.exchange_rate
+                        const n = typeof raw === 'number' ? raw : parseFloat(raw)
+                        return Number.isFinite(n) ? n.toFixed(4) : '-'
+                      })()}
                     </td>
                     <td className="py-3 text-gray-600">
                       {new Date(tx.created_at).toLocaleDateString('en-ET')}
