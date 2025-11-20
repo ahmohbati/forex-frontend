@@ -1,11 +1,7 @@
 import axios from 'axios';
 
-// Allow overriding API base URL via global set by `main.jsx` (Vite), or process.env for tests/CI.
-// Using globalThis.__VITE_API_URL__ avoids referencing `import.meta` here which can
-// cause issues in some test environments.
 const API_BASE_URL = (typeof globalThis !== 'undefined' && globalThis.__VITE_API_URL__)
   || (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL)
-  || 'http://localhost:3000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -56,9 +52,7 @@ export const currencyAPI = {
 };
 
 export const transactionAPI = {
-  // Accept optional params (e.g. { page, limit }) and forward them as query params.
-  // Also normalize common pagination param aliases so the frontend can work with
-  // different backend conventions (pageNumber, perPage, page_size, etc.).
+  
   getTransactions: (params = {}) => {
     if (!params || Object.keys(params).length === 0) {
       return api.get('/transactions')
