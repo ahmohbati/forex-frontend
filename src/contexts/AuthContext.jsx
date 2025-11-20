@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authAPI } from '../lib/api';
+import { safeGetJSON, safeSetJSON, safeRemove, safeGetString } from '../lib/storage';
 
 const AuthContext = createContext();
 
@@ -16,11 +17,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+    const storedUser = safeGetJSON('user');
+    const rawToken = safeGetString('token');
+
+    if (rawToken && storedUser) {
+      setUser(storedUser);
     }
     setLoading(false);
   }, []);
@@ -30,8 +31,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login({ email, password });
       const { token, user } = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      safeSetJSON('user', user);
+      try { localStorage.setItem('token', token); } catch (_) {}
       setUser(user);
       
       return { success: true };
@@ -48,8 +49,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register(userData);
       const { token, user } = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      safeSetJSON('user', user);
+      try { localStorage.setItem('token', token); } catch (_) {}
       setUser(user);
       
       return { success: true };
@@ -62,8 +63,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    try { localStorage.removeItem('token'); } catch (_) {}
+    safeRemove('user');
     setUser(null);
   };
 

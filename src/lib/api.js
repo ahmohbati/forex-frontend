@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { safeGetString, safeRemove } from './storage';
 
 const API_BASE_URL = (typeof globalThis !== 'undefined' && globalThis.__VITE_API_URL__)
   || (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL)
@@ -13,7 +14,7 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = safeGetString('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,8 +30,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      try { localStorage.removeItem('token'); } catch (_) {}
+      safeRemove('user');
       window.location.href = '/login';
     }
     return Promise.reject(error);
