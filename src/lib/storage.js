@@ -2,7 +2,14 @@
 export function safeGetJSON(key) {
   try {
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
-    if (!raw) return null;
+    // Treat explicit string values that represent emptiness as missing
+    if (raw === null) return null;
+    const trimmed = typeof raw === 'string' ? raw.trim() : raw;
+    if (trimmed === '' || trimmed === 'undefined' || trimmed === 'null') {
+      // remove bad value to avoid repeating the parse error later
+      try { localStorage.removeItem(key); } catch (_) {}
+      return null;
+    }
     return JSON.parse(raw);
   } catch (e) {
     console.warn(`safeGetJSON: invalid JSON for key=${key}`, e);
