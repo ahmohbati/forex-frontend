@@ -17,7 +17,14 @@ const Login = () => {
     try {
       const result = await login(email, password);
       if (result.success) {
-        navigate('/dashboard');
+        const tokenVal = typeof localStorage !== 'undefined' && localStorage.getItem ? localStorage.getItem('token') : null;
+        const userVal = typeof localStorage !== 'undefined' && localStorage.getItem ? localStorage.getItem('user') : null;
+        console.debug('Login: navigating to /dashboard', { result, token: tokenVal, user: userVal });
+        try {
+          navigate('/dashboard');
+        } catch (navErr) {
+          console.error('Login: navigation to /dashboard failed', navErr);
+        }
       } else {
         alert(result.error);
       }
