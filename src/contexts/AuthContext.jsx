@@ -24,13 +24,17 @@ export const AuthProvider = ({ children }) => {
     if (rawToken && storedUser) {
       setUser(storedUser);
     } else if (rawToken && !storedUser) {
-      console.warn('AuthProvider:init found token but no stored user');
+      // If there is a token but no stored user, it's likely a stale/incomplete state.
+      // Remove token to avoid inconsistent auth state and force a fresh login.
+      console.warn('AuthProvider:init found token but no stored user — clearing token to avoid stale auth');
+      try { localStorage.removeItem('token'); } catch (_) {}
     }
 
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
+    console.debug('AuthProvider:login start', { email });
     try {
       const response = await authAPI.login({ email, password });
       console.debug('auth.login response:', response?.data);
@@ -55,10 +59,10 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, user };
     } catch (error) {
-      console.error('auth.login error:', error?.response?.data || error.message || error);
+      console.error('auth.login error:', error);
       return { 
         success: false, 
-        error: error.response?.data?.error || 'Login failed' 
+        error: error.response?.data?.error || error.message || 'Login failed' 
       };
     }
   };

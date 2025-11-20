@@ -1,8 +1,16 @@
 import axios from 'axios';
 import { safeGetString, safeRemove } from './storage';
 
-const API_BASE_URL = (typeof globalThis !== 'undefined' && globalThis.__VITE_API_URL__)
-  || (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL)
+// Resolve API base URL from several places. Prefer Vite-provided env, then process, then sensible localhost fallback for dev.
+const API_BASE_URL = (
+  (typeof globalThis !== 'undefined' && globalThis.__VITE_API_URL__) ||
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ||
+  (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) ||
+  // If running on localhost and no env provided, point to local backend default
+  (typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : undefined)
+);
+
+try { console.debug('API_BASE_URL resolved to', API_BASE_URL); } catch (_) {}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -15,6 +23,12 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = safeGetString('token');
+    // Debug: log outgoing auth requests and token presence (don't print full token)
+    try {
+      if (config && config.url && config.url.includes('/auth')) {
+        console.debug('API request', { method: config.method, url: config.url, hasToken: !!token });
+      }
+    } catch (_) {}
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,7 +41,14 @@ api.interceptors.request.use(
 
 // Response interceptor for error handling
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    try {
+      if (response?.config?.url && String(response.config.url).includes('/auth')) {
+        console.debug('API response', { url: response.config.url, status: response.status, data: response.data });
+      }
+    } catch (_) {}
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       try { localStorage.removeItem('token'); } catch (_) {}
