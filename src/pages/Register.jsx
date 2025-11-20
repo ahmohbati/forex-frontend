@@ -23,17 +23,21 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Register.handleSubmit called', { formData });
     setLoading(true);
-
-    const result = await register(formData);
-    
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      alert(result.error);
+    try {
+      const result = await register(formData);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        alert(result.error);
+      }
+    } catch (err) {
+      console.error('Register submit error', err);
+      alert('An unexpected error occurred. See console for details.');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (

@@ -12,17 +12,21 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Login.handleSubmit called', { email });
     setLoading(true);
-
-    const result = await login(email, password);
-    
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      alert(result.error);
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        alert(result.error);
+      }
+    } catch (err) {
+      console.error('Login submit error', err);
+      alert('An unexpected error occurred. See console for details.');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
