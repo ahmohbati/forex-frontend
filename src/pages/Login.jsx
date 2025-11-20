@@ -12,14 +12,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login.handleSubmit called', { email });
     setLoading(true);
     try {
       const result = await login(email, password);
       if (result.success) {
-        const tokenVal = typeof localStorage !== 'undefined' && localStorage.getItem ? localStorage.getItem('token') : null;
-        const userVal = typeof localStorage !== 'undefined' && localStorage.getItem ? localStorage.getItem('user') : null;
-        console.debug('Login: navigating to /dashboard', { result, token: tokenVal, user: userVal });
         try {
           navigate('/dashboard');
         } catch (navErr) {

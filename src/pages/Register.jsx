@@ -23,14 +23,10 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Register.handleSubmit called', { formData });
     setLoading(true);
     try {
       const result = await register(formData);
       if (result.success) {
-        const tokenVal = typeof localStorage !== 'undefined' && localStorage.getItem ? localStorage.getItem('token') : null;
-        const userVal = typeof localStorage !== 'undefined' && localStorage.getItem ? localStorage.getItem('user') : null;
-        console.debug('Register: navigating to /dashboard', { result, token: tokenVal, user: userVal });
         try {
           navigate('/dashboard');
         } catch (navErr) {

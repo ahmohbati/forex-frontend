@@ -2,17 +2,18 @@ const axios = require('axios')
 
 const base = (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL)
   || 'http://localhost:3000/api'
+const dbg = (...args) => { if (process.env.DEBUG) console.log(...args); }
 
 async function run() {
-  console.log('Checking backend at', base)
+  dbg('Checking backend at', base)
   try {
     const res = await axios.get(`${base.replace(/\/$/, '')}/transactions`, { timeout: 3000 })
-    console.log('Status:', res.status)
+    dbg('Status:', res.status)
     if (res.data) {
       if (Array.isArray(res.data)) {
-        console.log('Returned array with', res.data.length, 'items')
+        dbg('Returned array with', res.data.length, 'items')
       } else {
-        console.log('Sample response keys:', Object.keys(res.data).slice(0, 10))
+        dbg('Sample response keys:', Object.keys(res.data).slice(0, 10))
       }
     }
   } catch (err) {

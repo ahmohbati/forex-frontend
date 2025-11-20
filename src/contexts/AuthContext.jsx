@@ -19,8 +19,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = safeGetJSON('user');
     const rawToken = safeGetString('token');
-    console.debug('AuthProvider:init', { storedUser, rawTokenPreview: rawToken ? `${String(rawToken).slice(0,8)}...` : null });
-
     if (rawToken && storedUser) {
       setUser(storedUser);
     } else if (rawToken && !storedUser) {
@@ -34,10 +32,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    console.debug('AuthProvider:login start', { email });
     try {
       const response = await authAPI.login({ email, password });
-      console.debug('auth.login response:', response?.data);
+      // auth response handled below
       const { token, user } = response.data || {};
       if (user) {
         safeSetJSON('user', user);
@@ -51,11 +48,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(user || null);
 
-      console.debug('AuthProvider:login stored', {
-        hasToken: !!token,
-        hasUser: !!user,
-        tokenPreview: token ? `${String(token).slice(0,8)}...` : null
-      });
+      // stored login info
 
       return { success: true, user };
     } catch (error) {
@@ -70,7 +63,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
-      console.debug('auth.register response:', response?.data);
+      // auth.register response handled below
       const { token, user } = response.data || {};
 
       if (user) {
@@ -85,11 +78,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(user || null);
 
-      console.debug('AuthProvider:register stored', {
-        hasToken: !!token,
-        hasUser: !!user,
-        tokenPreview: token ? `${String(token).slice(0,8)}...` : null
-      });
+      // stored register info
 
       return { success: true, user };
     } catch (error) {
@@ -102,7 +91,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    console.debug('AuthProvider:logout clearing stored auth');
+    // logout clearing stored auth
     try { localStorage.removeItem('token'); } catch (_) {}
     safeRemove('user');
     setUser(null);

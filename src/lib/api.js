@@ -10,7 +10,7 @@ const API_BASE_URL = (
   (typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : undefined)
 );
 
-try { console.debug('API_BASE_URL resolved to', API_BASE_URL); } catch (_) {}
+// API_BASE_URL resolved at module load; no debug output in production code.
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -24,11 +24,7 @@ api.interceptors.request.use(
   (config) => {
     const token = safeGetString('token');
     // Debug: log outgoing auth requests and token presence (don't print full token)
-    try {
-      if (config && config.url && config.url.includes('/auth')) {
-        console.debug('API request', { method: config.method, url: config.url, hasToken: !!token });
-      }
-    } catch (_) {}
+    // no-op: keep request interceptor minimal in production
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -42,11 +38,6 @@ api.interceptors.request.use(
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
-    try {
-      if (response?.config?.url && String(response.config.url).includes('/auth')) {
-        console.debug('API response', { url: response.config.url, status: response.status, data: response.data });
-      }
-    } catch (_) {}
     return response;
   },
   (error) => {
